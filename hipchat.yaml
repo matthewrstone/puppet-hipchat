@@ -7,3 +7,4 @@
 :hipchat_statuses:
   - failed
 :hipchat_puppetboard: 'false'
+:hipchat_server: 'your.server.name.here'

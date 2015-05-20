@@ -19,7 +19,7 @@ Puppet::Reports.register_report(:hipchat) do
   HIPCHAT_STATUSES = Array(config[:hipchat_statuses] || 'failed')
   HIPCHAT_PUPPETBOARD = config[:hipchat_puppetboard]
   HIPCHAT_DASHBOARD = config[:hipchat_dashboard]
-
+  HIPCHAT_SERVER = config[:hipchat_server]
   # set the default colors if not defined in the config
   HIPCHAT_FAILED_COLOR = config[:failed_color] || 'red'
   HIPCHAT_CHANGED_COLOR = config[:successful_color] || 'green'
@@ -72,10 +72,18 @@ Puppet::Reports.register_report(:hipchat) do
         elsif HIPCHAT_DASHBOARD != 'false'
           msg << ": #{HIPCHAT_DASHBOARD}/nodes/#{self.host}/view"
         end
-        if HIPCHAT_PROXY
-          client = HipChat::Client.new(HIPCHAT_API, :http_proxy => HIPCHAT_PROXY)
+        if HIPCHAT_SERVER
+          if HIPCHAT_PROXY
+            client = HipChat::Client.new(HIPCHAT_API, :http_proxy => HIPCHAT_PROXY, :server_url => HIPCHAT_SERVER)
+          else
+            client = HipChat::Client.new(HIPCHAT_API, :server_url => HIPCHAT_SERVER)
+          end
         else
-          client = HipChat::Client.new(HIPCHAT_API)
+          if HIPCHAT_PROXY
+            client = HipChat::Client.new(HIPCHAT_API, :http_proxy => HIPCHAT_PROXY)
+          else
+            client = HipChat::Client.new(HIPCHAT_API)
+          end
         end
         client[HIPCHAT_ROOM].send('Puppet', msg, :notify => HIPCHAT_NOTIFY, :color => color(self.status), :message_format => 'text')
     end
